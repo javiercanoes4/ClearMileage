@@ -32,4 +32,8 @@ contract ClearMileage {
     function getCarInfo(address wallet) public view returns (carInfo memory){
         return cars[wallet];
     }
+
+    function greet() public view returns (string memory) {
+        return "HELLO";
+    }
 }
