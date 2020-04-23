@@ -1,1 +1,1 @@
-{"provider": "http://localhost:7545", "matricula": "YES"}
+{"provider": "HTTP://127.0.0.1:7545", "public_key": "0xF06b548dc655D4D1E56FD56d5a7a5046c52215B3", "private_key": "0x4e891c942505d13329cf89c6c5893c663e874905190bc2db1a6a9624613570be", "contract_address": "0x509f1747108f652b6303124F831e0338D8d0D7D9", "matricula": "TESTING"}
