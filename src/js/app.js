@@ -9,8 +9,8 @@ App = {
   },
 
   initWeb3: async function () {
-    //App.web3Provider = new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/9f57387ab6054fc9a3bf6335aaa9fcf6');
-    App.web3Provider = new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545');
+    App.web3Provider = new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/9f57387ab6054fc9a3bf6335aaa9fcf6');
+    //App.web3Provider = new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545');
     web3 = new Web3(App.web3Provider);
 
     return App.initContract();
@@ -61,8 +61,11 @@ App = {
         for (let i = 0; i < v.kmArray.length; ++i) {
           //var date = new Date((v.kmArray[i].date) * 1000 + 3.154e+7*1000*i);
           var date = new Date((v.kmArray[i].date) * 1000 + 604800*1000*i);
+          var km = (parseInt(v.kmArray[i].m) * 0.001) + parseInt(v.kmArray[i].km)
+          console.log(km)
           //var km = parseInt(v.kmArray[i].km) + 1000*i;
           v.kmArray[i].date = date;
+          v.kmArray[i].km = km;
           //v.kmArray[i].km = km;
           //document.getElementById("testP").innerHTML = "KEK";
         }

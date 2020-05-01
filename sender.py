@@ -11,69 +11,139 @@ def config():
     private_key = input("Private key: ")
     contract_address = input("Contract address: ")
     matricula = input("Matrícula: ")
+    VIN = input("VIN: ")
     data = {}
     data["provider"] = provider
     data["public_key"] = public_key
     data["private_key"] = private_key
     data["contract_address"] = contract_address
     data["matricula"] = matricula
+    data["VIN"] = VIN
     with open("config.json", 'w') as outfile:
         json.dump(data, outfile)
 
-if sys.argv[1] == "-c":
-    config()
-else:
-    try:
-        with open("config.json") as file:
-            config_json = json.load(file)
-    except IOError:
-        print("Config not created")
-        config()
-        exit()
+def interact(m, dev, change, account=0):
+    with open("config.json") as file:
+        config_json = json.load(file)
     provider = config_json["provider"]
     public_key = config_json["public_key"]
     private_key = config_json["private_key"]
     contract_address = config_json["contract_address"]
     matricula = config_json["matricula"]
+    VIN = config_json["VIN"]
 
     web3 = Web3(Web3.HTTPProvider(provider))
-
-    #web3.eth.defaultAccount = web3.eth.accounts[1]
-
     print(web3.isConnected())
-
     print(web3.eth.blockNumber)
-
-    # print(web3.eth.accounts)
 
     with open("build/Contracts/ClearMileage.json") as file:
         info_json = json.load(file)
     abi = info_json["abi"]
 
-    # ClearMileage = web3.eth.contract(abi=abi, address="0x06E131Aee4F75aE10b6fe9D0cD126A01BE714CfD")
     ClearMileage = web3.eth.contract(abi=abi, address=contract_address)
-
     print(ClearMileage.functions.greet().call())
-
     print(web3.eth.defaultBlock)
 
-    # nonce = web3.eth.getTransactionCount('0x1C8c73e52b4D85C47813771C30CdF326ACFd33F8')
-    # print(web3.eth.getTransactionCount('0x1C8c73e52b4D85C47813771C30CdF326ACFd33F8'))
+    newMeters = 0
+    newKilometers = 0
+    kilometers = 0
+    meters = 0
+
     nonce = web3.eth.getTransactionCount(public_key)
-    # print(web3.eth.getTransactionCount('0xe62549DDeCF2C0319497DAd71c4F8595A6259ca9'))
-    if len(sys.argv) > 2 and sys.argv[2] == "dev":
+
+    if change == False:
+        kmArray = ClearMileage.functions.getCarInfo(VIN).call()[1]
+        last_element = len(kmArray)-1
+        if last_element >= 0:
+            kilometers = kmArray[last_element][1]
+            meters = kmArray[last_element][2]
+        kmOBD = int(m/1000)
+        metersOBD = int((m/1000-int(m/1000))*1000)
+        newMeters = int(((meters + metersOBD)/1000-int((meters + metersOBD)/1000))*1000)
+        newKilometers = kilometers + kmOBD + (int((meters + metersOBD)/1000))
+
+    if dev == True:
         web3.eth.defaultAccount = public_key
-        tx_hash = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1])).transact()
-    # txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1])).buildTransaction({'nonce': web3.eth.getTransactionCount('0x1C8c73e52b4D85C47813771C30CdF326ACFd33F8')})
+        if change == True:
+            tx_hash = ClearMileage.functions.changeCarOwner(VIN, account).transact()
+        else:
+            tx_hash = ClearMileage.functions.setCarInfo(matricula, newKilometers, newMeters, VIN).transact()
     else:
-        txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1])).buildTransaction({'nonce': nonce})
-    # tx_signed = web3.eth.account.sign_transaction(txn, '0x64A5760A6F7A391DC4251B876EC360B57370C06FCE1CE920F95CFA320C19801F')
-        tx_signed = web3.eth.account.sign_transaction(txn, private_key)
-        print(tx_signed)
-        tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
-        print(tx_hash)
+        if change == True:
+            txn = ClearMileage.functions.changeCarOwner(VIN, account).buildTransaction({'nonce': nonce, 'gas': 300000})
+            tx_signed = web3.eth.account.sign_transaction(txn, private_key)
+            print(tx_signed)
+            tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
+            print(tx_hash)
+        else:
+            txn = ClearMileage.functions.setCarInfo(matricula, newKilometers, newMeters, VIN).buildTransaction({'nonce': nonce, 'gas': 300000})
+            tx_signed = web3.eth.account.sign_transaction(txn, private_key)
+            print(tx_signed)
+            tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
+            print(tx_hash)
+
     tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
     print(tx_receipt.gasUsed)
+
+    print(ClearMileage.functions.getCarInfo(VIN).call())
+
+
+
+if __name__ == "__main__":
+    if sys.argv[1] == "-c":
+        config()
+    else:
+        try:
+            with open("config.json") as file:
+                config_json = json.load(file)
+        except IOError:
+            print("Config not created")
+            config()
+            exit()
+        provider = config_json["provider"]
+        public_key = config_json["public_key"]
+        private_key = config_json["private_key"]
+        contract_address = config_json["contract_address"]
+        matricula = config_json["matricula"]
+        VIN = config_json["VIN"]
+
+        web3 = Web3(Web3.HTTPProvider(provider))
+
+        #web3.eth.defaultAccount = web3.eth.accounts[1]
+
+        print(web3.isConnected())
+
+        print(web3.eth.blockNumber)
+
+        # print(web3.eth.accounts)
+
+        with open("build/Contracts/ClearMileage.json") as file:
+            info_json = json.load(file)
+        abi = info_json["abi"]
+
+        ClearMileage = web3.eth.contract(abi=abi, address=contract_address)
+
+        print(ClearMileage.functions.greet().call())
+
+        print(web3.eth.defaultBlock)
+
+        nonce = web3.eth.getTransactionCount(public_key)
+        if len(sys.argv) > 3 and sys.argv[3] == "dev":
+            web3.eth.defaultAccount = public_key
+            tx_hash = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), int(sys.argv[2]), VIN).transact()
+        elif sys.argv[1] == "-o":
+            web3.eth.defaultAccount = public_key
+            tx_hash = ClearMileage.functions.changeCarOwner(VIN, sys.argv[2]).transact()
+        else:
+            txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), int(sys.argv[2]), VIN).buildTransaction({'nonce': nonce})
+            tx_signed = web3.eth.account.sign_transaction(txn, private_key)
+            print(tx_signed)
+            tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
+            print(tx_hash)
+        tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+        print(tx_receipt.gasUsed)
+
+        print(ClearMileage.functions.getCarInfo(VIN).call()[1])
     
     # tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
     # print(tx_receipt.gasUsed)
