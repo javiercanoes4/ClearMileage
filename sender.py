@@ -45,8 +45,6 @@ def interact(m, dev, change, account=0):
     print(web3.eth.defaultBlock)
 
     newMeters = 0
-    newKilometers = 0
-    kilometers = 0
     meters = 0
 
     nonce = web3.eth.getTransactionCount(public_key)
@@ -55,19 +53,16 @@ def interact(m, dev, change, account=0):
         kmArray = ClearMileage.functions.getCarInfo(VIN).call()[1]
         last_element = len(kmArray)-1
         if last_element >= 0:
-            kilometers = kmArray[last_element][1]
-            meters = kmArray[last_element][2]
-        kmOBD = int(m/1000)
-        metersOBD = int((m/1000-int(m/1000))*1000)
-        newMeters = int(((meters + metersOBD)/1000-int((meters + metersOBD)/1000))*1000)
-        newKilometers = kilometers + kmOBD + (int((meters + metersOBD)/1000))
+            meters = kmArray[last_element][1]
+        newMeters = meters + m
+        newMeters = int(newMeters)
 
     if dev == True:
         web3.eth.defaultAccount = public_key
         if change == True:
             tx_hash = ClearMileage.functions.changeCarOwner(VIN, account).transact()
         else:
-            tx_hash = ClearMileage.functions.setCarInfo(matricula, newKilometers, newMeters, VIN).transact()
+            tx_hash = ClearMileage.functions.setCarInfo(matricula, newMeters, VIN).transact()
     else:
         if change == True:
             txn = ClearMileage.functions.changeCarOwner(VIN, account).buildTransaction({'nonce': nonce, 'gas': 300000})
@@ -76,7 +71,7 @@ def interact(m, dev, change, account=0):
             tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
             print(tx_hash)
         else:
-            txn = ClearMileage.functions.setCarInfo(matricula, newKilometers, newMeters, VIN).buildTransaction({'nonce': nonce, 'gas': 300000})
+            txn = ClearMileage.functions.setCarInfo(matricula, newMeters, VIN).buildTransaction({'nonce': nonce, 'gas': 300000})
             tx_signed = web3.eth.account.sign_transaction(txn, private_key)
             print(tx_signed)
             tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
@@ -128,14 +123,14 @@ if __name__ == "__main__":
         print(web3.eth.defaultBlock)
 
         nonce = web3.eth.getTransactionCount(public_key)
-        if len(sys.argv) > 3 and sys.argv[3] == "dev":
+        if len(sys.argv) > 2 and sys.argv[2] == "dev":
             web3.eth.defaultAccount = public_key
-            tx_hash = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), int(sys.argv[2]), VIN).transact()
+            tx_hash = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), VIN).transact()
         elif sys.argv[1] == "-o":
             web3.eth.defaultAccount = public_key
             tx_hash = ClearMileage.functions.changeCarOwner(VIN, sys.argv[2]).transact()
         else:
-            txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), int(sys.argv[2]), VIN).buildTransaction({'nonce': nonce})
+            txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), VIN).buildTransaction({'nonce': nonce})
             tx_signed = web3.eth.account.sign_transaction(txn, private_key)
             print(tx_signed)
             tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 

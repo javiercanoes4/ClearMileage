@@ -15,7 +15,7 @@ except IOError:
     print("Config not created")
     sender.config()
 
-connection = obd.OBD("\\.\\COM3")
+connection = obd.OBD("\\.\\COM5")
 status = connection.status()
 print(status)
 

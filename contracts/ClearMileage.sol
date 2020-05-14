@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 contract ClearMileage {
     struct dateKm {
         uint date;
-        uint km;
         uint m;
     }
     struct carInfo {
@@ -14,22 +13,21 @@ contract ClearMileage {
     }
     mapping(address => mapping(string => carInfo)) public cars;
     mapping(string => address) VINtoAdress;
-    
-    function setCarInfo(string memory matr, uint km, uint m, string memory VIN) public{
-        if (cars[msg.sender][VIN].exists) setCarKm(km, m, VIN);
+
+    function setCarInfo(string memory matr, uint m, string memory VIN) public{
+        if (cars[msg.sender][VIN].exists) setCarKm(m, VIN);
         else{
             require (!cars[VINtoAdress[VIN]][VIN].exists, "Car already exists.");
             cars[msg.sender][VIN].matricula = matr;
             cars[msg.sender][VIN].exists = true;
             VINtoAdress[VIN] = msg.sender;
-            setCarKm(km, m, VIN);
+            setCarKm(m, VIN);
         }
     }
 
-    function setCarKm(uint km, uint m, string memory VIN) public{
+    function setCarKm(uint m, string memory VIN) public{
             dateKm memory temp;
             temp.date = now;
-            temp.km = km;
             temp.m = m;
             cars[msg.sender][VIN].kmArray.push(temp);
     }

@@ -75,8 +75,8 @@ App = {
         var Grafic = document.getElementById("myChart").style.display = "table";
         for (let i = 0; i < v.kmArray.length; ++i) {
           //var date = new Date((v.kmArray[i].date) * 1000 + 3.154e+7*1000*i);
-          var date = new Date((v.kmArray[i].date) * 1000 + 604800*1000*i);
-          var km = (parseInt(v.kmArray[i].m) * 0.001) + parseInt(v.kmArray[i].km)
+          var date = new Date((v.kmArray[i].date) * 1000 );//+ 604800*1000*i
+          var km = (parseInt(v.kmArray[i].m) * 0.001)
           console.log(km)
           //var km = parseInt(v.kmArray[i].km) + 1000*i;
           v.kmArray[i].date = date;
@@ -130,7 +130,7 @@ App = {
                   },
                   type: 'time',
                   time: {
-                    stepSize: 10
+                    stepSize: 5
                   },
                   scaleLabel: {
                     display: true,
