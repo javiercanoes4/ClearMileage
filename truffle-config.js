@@ -10,7 +10,8 @@ module.exports = {
       network_id: "*" // Match any network id
     },
     ropsten: {
-      provider: new HDWalletProvider("foot erupt knock pull slam manage meadow book lizard weird artefact science", "https://ropsten.infura.io/v3/9f57387ab6054fc9a3bf6335aaa9fcf6"),
+      // Hace falta configurar un mnemonico para el deployment
+      provider: new HDWalletProvider("mnemonic", "https://ropsten.infura.io/v3/9f57387ab6054fc9a3bf6335aaa9fcf6"),
       network_id: '3',
     },
     develop: {

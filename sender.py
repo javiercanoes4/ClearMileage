@@ -65,7 +65,7 @@ def interact(m, dev, change, account=0):
             tx_hash = ClearMileage.functions.setCarInfo(matricula, newMeters, VIN).transact()
     else:
         if change == True:
-            txn = ClearMileage.functions.changeCarOwner(VIN, account).buildTransaction({'nonce': nonce, 'gas': 300000})
+            txn = ClearMileage.functions.changeCarOwner(VIN, account).buildTransaction({'nonce': nonce, 'gas': 3000000})
             tx_signed = web3.eth.account.sign_transaction(txn, private_key)
             print(tx_signed)
             tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
             web3.eth.defaultAccount = public_key
             tx_hash = ClearMileage.functions.changeCarOwner(VIN, sys.argv[2]).transact()
         else:
-            txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), VIN).buildTransaction({'nonce': nonce})
+            txn = ClearMileage.functions.setCarInfo(matricula, int(sys.argv[1]), VIN).buildTransaction({'nonce': nonce, 'gas': 300000})
             tx_signed = web3.eth.account.sign_transaction(txn, private_key)
             print(tx_signed)
             tx_hash = web3.eth.sendRawTransaction(tx_signed.rawTransaction) 
